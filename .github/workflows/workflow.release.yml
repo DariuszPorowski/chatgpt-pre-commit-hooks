@@ -1,0 +1,149 @@
+---
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+# permissions:
+#   contents: write
+concurrency:
+  group: ${{ format('{0}-{1}', github.event_name, github.ref) }}
+  cancel-in-progress: false
+
+jobs:
+  gh-diag:
+    name: Run GitHub diagnostic
+    uses: ./.github/workflows/reuse.ghdiag.yml
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: .python-version
+
+      - name: Install dependencies
+        run: pip install . .[dev]
+
+      - name: Build
+        run: python -m build --wheel
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: |
+            dist/*
+
+  pypi-release-test:
+    name: PyPI Release (test)
+    needs: build
+    environment:
+      name: pypi-test
+      url: https://test.pypi.org/project/chatgpt-pre-commit-hooks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: .python-version
+
+      - name: Install dependencies
+        run: pip install .[dev]
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - name: Publish to PyPI
+        run: twine upload --verbose --repository testpypi dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+
+  pypi-release-prod:
+    name: PyPI Release (prod)
+    needs:
+      - build
+      - pypi-release-test
+    environment:
+      name: pypi-prod
+      url: https://pypi.org/project/chatgpt-pre-commit-hooks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: .python-version
+
+      - name: Install dependencies
+        run: pip install .[dev]
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - name: Publish to PyPI
+        run: twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+
+  gh-release-update:
+    name: GitHub Release
+    needs: pypi-release-prod
+    permissions:
+      contents: write
+    environment:
+      name: gh-releases
+      url: ${{ steps.gh-release.outputs.url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - name: Release
+        id: gh-release
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: false
+          files: |
+            dist/*
+
+      # https://docs.github.com/en/rest/releases/releases#update-a-release
+      # - name: Mark as latest
+      #   uses: octokit/request-action@v2.1.7
+      #   id: set_release_make_latest
+      #   with:
+      #     route: PATCH /repos/{repo}/releases/{release_id}
+      #     repo: ${{ github.repository }}
+      #     release_id: ${{ steps.gh-release.outputs.id }}
+      #     make_latest: true
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+
+      # - run: echo Release could not be found. Request failed with status ${{ steps.set_release_make_latest.outputs.status }}
+      #   if: ${{ failure() }}

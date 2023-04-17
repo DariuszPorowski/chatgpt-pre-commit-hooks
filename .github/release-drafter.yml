@@ -1,0 +1,74 @@
+---
+name-template: v$RESOLVED_VERSION
+tag-template: v$RESOLVED_VERSION
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+  ## 👥 Contributors
+
+  $CONTRIBUTORS
+
+  See details of all code changes: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION since previous release.
+
+categories:
+  - title: 💥 Breaking
+    labels:
+      - major
+      - breaking
+  - title: 🚀 Features
+    labels:
+      - minor
+      - feature
+      - enhancement
+  - title: 🐛 Bug Fixes
+    labels:
+      - fix
+      - bugfix
+      - bug
+  - title: 🔧 Maintenance
+    labels:
+      - maintenance
+      - chore
+  - title: 📚 Documentation
+    labels:
+      - docs
+      - documentation
+  - title: Other changes
+    label: patch
+  - title: ⬆️ Dependency Updates
+    labels:
+      - dependencies
+      - deps
+    collapse-after: 3
+  - title: 🔐 Security Updates
+    label: security
+    collapse-after: 3
+exclude-labels:
+  - skip-changelog
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
+version-resolver:
+  major:
+    labels:
+      - major
+      - breaking
+  minor:
+    labels:
+      - minor
+      - feature
+      - enhancement
+  patch:
+    labels:
+      - patch
+      - fix
+      - bugfix
+      - bug
+      - maintenance
+      - chore
+      - docs
+      - documentation
+      - dependencies
+      - security
+  default: patch

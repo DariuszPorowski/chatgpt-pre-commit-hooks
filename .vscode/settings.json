@@ -1,0 +1,125 @@
+{
+	// git
+	"git.autorefresh": true,
+	"git.autofetch": true,
+	"git.fetchOnPull": true,
+	"git.pruneOnFetch": true,
+	"git.branchProtection": [
+		"main",
+		"master",
+	],
+	// files
+	"files.trimTrailingWhitespace": true,
+	"files.insertFinalNewline": true,
+	"files.associations": {
+		"CODEOWNERS": "ignore",
+	},
+	// editor
+	"editor.formatOnSave": true,
+	"editor.formatOnPaste": true,
+	"editor.formatOnType": true,
+	// markdown
+	"markdown.extension.toc.levels": "2..6",
+	// python general
+	"[python]": {
+		"editor.defaultFormatter": "ms-python.black-formatter",
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": true,
+		},
+	},
+	"python.languageServer": "Pylance",
+	// https://code.visualstudio.com/docs/python/settings-reference
+	"python.terminal.activateEnvInCurrentTerminal": true,
+	// python code analysis
+	"python.analysis.autoImportCompletions": true,
+	"python.analysis.typeCheckingMode": "basic",
+	// python formatting
+	"python.formatting.provider": "none",
+	"python.formatting.blackArgs": [
+		"--config",
+		"pyproject.toml",
+	],
+	// https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter
+	"black-formatter.args": [
+		"--config",
+		"pyproject.toml"
+	],
+	"isort.args": [
+		"--settings-path",
+		"pyproject.toml"
+	],
+	"python.formatting.autopep8Args": [
+		"--global-config",
+		"pyproject.toml"
+	],
+	"autopep8.args": [
+		"--global-config",
+		"pyproject.toml"
+	],
+	// python linting
+	"python.linting.enabled": true,
+	"python.linting.lintOnSave": true,
+	// python linting - pylint
+	"python.linting.pylintEnabled": true,
+	"python.linting.pylintArgs": [
+		"--rcfile",
+		"pyproject.toml"
+	],
+	"pylint.args": [
+		"--rcfile",
+		"pyproject.toml"
+	],
+	// python linting - pycodestyle
+	"python.linting.pycodestyleEnabled": true,
+	"python.linting.pycodestyleArgs": [
+		"--config-file",
+		"pyproject.toml"
+	],
+	// python linting - flake8
+	"python.linting.flake8Enabled": true,
+	// python linting - mypy
+	"python.linting.mypyEnabled": true,
+	"python.linting.mypyArgs": [
+		"--config-file",
+		"pyproject.toml",
+		"--no-pretty",
+	],
+	"mypy-type-checker.args": [
+		"--config-file",
+		"pyproject.toml",
+		"--no-pretty",
+	],
+	// python linting - pydocstyle
+	"python.linting.pydocstyleEnabled": true,
+	"python.linting.pydocstyleArgs": [
+		"--config",
+		"pyproject.toml"
+	],
+	// python linting - prospector
+	"python.linting.prospectorEnabled": false,
+	"python.linting.prospectorArgs": [],
+	// python linting - pylama
+	"python.linting.pylamaEnabled": false,
+	"python.linting.pylamaArgs": [],
+	// python linting - bandit
+	"python.linting.banditEnabled": true,
+	"python.linting.banditArgs": [
+		"--configfile",
+		"pyproject.toml"
+	],
+	// python testing
+	"python.testing.pytestEnabled": false,
+	"python.testing.pytestArgs": [
+		"tests"
+	],
+	"pythonTestExplorer.testFramework": "pytest",
+	"pythonTestExplorer.testplanEnabled": true,
+	// python linting - ruff
+	"ruff.args": [
+		"--config",
+		"pyproject.toml"
+	],
+	"ruff.fixAll": true,
+	"dotenv.enableAutocloaking": false
+}
