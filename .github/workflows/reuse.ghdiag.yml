@@ -1,0 +1,36 @@
+name: _reuse - GH diag
+
+on:
+  workflow_call:
+
+jobs:
+  ghdiag:
+    name: Run GitHub diagnostic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump
+        id: ghdiag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.debug('!!! START github START !!!')
+            core.info(JSON.stringify(github, null, '  '))
+            core.debug('!!! END github END !!!')
+
+            core.debug('!!! START context START !!!')
+            core.info(JSON.stringify(context, null, '  '))
+            core.debug('!!! END context END !!!')
+
+      - name: Dump GitHub context
+        run: echo "${GITHUB_CONTEXT}"
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+
+      - name: Show GitHub event
+        run: |
+          echo "${GITHUB_EVENT_PATH}"
+          cat "${GITHUB_EVENT_PATH}"
+
+      - name: printenv
+        run: |
+          printenv

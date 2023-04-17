@@ -1,0 +1,104 @@
+---
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+name: 🐛 Bug Report
+description: If something isn't working 🔧
+title: "[bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 🐛 What happened?
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 🔬 How to reproduce?
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: false
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: 🏗️ Code Sample / Log
+      description: Please copy and paste any relevant code sample / log output.
+      render: Shell
+      placeholder: This will be automatically formatted into code, so no need for backticks.
+    validations:
+      required: false
+  - type: input
+    id: chatgpt-pre-commit-hooks
+    attributes:
+      label: 🌌 Environment (ChatGPT / OpenAI pre-commit-hooks)
+      description: What ChatGPT / OpenAI pre-commit-hooks version are you running?
+      placeholder: 0.0.1
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: 🌌 Environment (pre-commit)
+      description: "What pre-commit version are you running? Get it with: `pre-commit --version`"
+      placeholder: 3.2.2
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: 🌌 Environment (Python)
+      description: "What python version are you running? Get it with: `python --version`"
+      placeholder: 3.10.10
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: 🌌 Environment (OS)
+      description: What OS are you running?
+      options:
+        - Linux
+        - Windows
+        - macOS
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📷 Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+      placeholder: Just do Ctrl+V having screenshot in the clipboard.
+    validations:
+      required: false
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 📈 Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: A clear and concise description of what you expected to happen.
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional context
+      description: Add any other context about the problem here.
+      placeholder: Add any other context about the problem here.
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 📜 Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true
