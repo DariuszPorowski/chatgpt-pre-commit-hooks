@@ -45,7 +45,7 @@ Example:
 ```yaml
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
-    rev: v0.0.1
+    rev: v0.1.0
     hooks:
       - id: chatgpt-commit-message
 ```
