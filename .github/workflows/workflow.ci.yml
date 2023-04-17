@@ -15,8 +15,6 @@ on:
       - main
     paths:
       - "*.py"
-      - "docs/**"
-      - "hooks/**"
       - "chatgpt_pre_commit_hooks/**"
       - ".pre-commit-config.yaml"
       - ".pre-commit-hooks.yaml"
