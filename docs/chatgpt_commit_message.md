@@ -25,7 +25,7 @@ Add to your `.pre-commit-config.yaml`
 ```yaml
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
-    rev: v0.1.0 # Use the ref you want to point at, see ⚠️ NOTE below!
+    rev: v0.1.1 # Use the ref you want to point at, see ⚠️ NOTE below!
     hooks:
       - id: chatgpt-commit-message
 ```
@@ -49,7 +49,7 @@ Example:
 ```yaml
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
-    rev: v0.1.0 # Use the ref you want to point at, see ⚠️ NOTE below!
+    rev: v0.1.1 # Use the ref you want to point at, see ⚠️ NOTE below!
     hooks:
       - id: chatgpt-commit-message
         args:

@@ -151,7 +151,7 @@ Example:
 ```yaml
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
-    rev: v0.1.0
+    rev: v0.1.1
     hooks:
       - id: chatgpt-commit-message
 ```
@@ -241,14 +241,14 @@ In addition to the environment variables listed in the [📥 Prerequisites setup
 
 Any environment variable can be overridden by hard-coded args in `pre-commit-config.yaml`, except `OPENAI_API_KEY`, `OPENAI_ORGANIZATION`.
 
-| Name                  |  Type  |  Default  | Description                                                            |
-|:----------------------|:------:|:---------:|:-----------------------------------------------------------------------|
+| Name                  |  Type  |  Default  | Description                                                                                                       |
+|:----------------------|:------:|:---------:|:------------------------------------------------------------------------------------------------------------------|
 | `--env-prefix`        | string | _not set_ | Set prefix for environment variables allowing multiple configurations. Read more: [`--env-prefix`](#--env-prefix) |
-| `--openai-max-tokens` |  int   | _not set_ | Overrides `OPENAI_MAX_TOKENS`                                          |
-| `--openai-proxy`      | string | _not set_ | Overrides `OPENAI_PROXY`                                               |
-| `--openai-model`      | string | _not set_ | Overrides `OPENAI_MODEL`                                               |
-| `--openai-api-base`   | string | _not set_ | Overrides `OPENAI_API_BASE`                                            |
-| `--openai-api-type`   | string | _not set_ | Overrides `OPENAI_API_TYPE`                                            |
+| `--openai-max-tokens` |  int   | _not set_ | Overrides `OPENAI_MAX_TOKENS`                                                                                     |
+| `--openai-proxy`      | string | _not set_ | Overrides `OPENAI_PROXY`                                                                                          |
+| `--openai-model`      | string | _not set_ | Overrides `OPENAI_MODEL`                                                                                          |
+| `--openai-api-base`   | string | _not set_ | Overrides `OPENAI_API_BASE`                                                                                       |
+| `--openai-api-type`   | string | _not set_ | Overrides `OPENAI_API_TYPE`                                                                                       |
 
 Example:
 
