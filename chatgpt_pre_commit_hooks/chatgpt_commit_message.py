@@ -31,8 +31,8 @@ def get_args() -> Namespace:
     parser.add_argument("--emoji", action=BooleanOptionalAction, default=False)  # args.emoji
     parser.add_argument("--description", action=BooleanOptionalAction, default=False)  # args.description
     parser.add_argument("--env-prefix", type=str, default=None, required=False)  # args.env_prefix
-    parser.add_argument("--openai-chat-model", type=str, default="gpt-3.5-turbo")  # args.openai_chat_model
-    parser.add_argument("--openai-organization", type=str, default=None, required=False)  # args.openai_organization
+    parser.add_argument("--openai-model", type=str, default=None, required=False)  # args.openai_model
+    parser.add_argument("--openai-max-tokens", type=int, default=None, required=False)  # args.openai_max_tokens
     parser.add_argument("--openai-api-base", type=str, default=None, required=False)  # args.openai_api_base
     parser.add_argument("--openai-api-type", type=str, default=None, required=False)  # args.openai_api_type
     parser.add_argument("--openai-proxy", type=str, default=None, required=False)  # args.openai_proxy
@@ -90,19 +90,27 @@ def _get_openai_config(args: Namespace) -> Dict[str, Optional[str]]:
     if openai_api_key is None or not openai_api_key:
         raise ValueError(f"`{env_prefix}OPENAI_API_KEY` environment variable is not set.")
 
-    openai_organization = os.environ.get(f"{env_prefix}OPENAI_ORGANIZATION", openai.organization)  # $env:OPENAI_ORGANIZATION
-    if args.openai_organization is not None:
-        openai_organization = args.openai_organization
+    openai_model = os.environ.get(f"{env_prefix}OPENAI_MODEL", "gpt-3.5-turbo")  # $env:OPENAI_MODEL
+    if args.openai_model is not None:
+        openai_model = args.openai_model
 
-    openai_api_base = os.environ.get(f"{env_prefix}OPENAI_API_BASE", openai.api_base)  # $env:OPENAI_API_BASE
-    if args.openai_api_base is not None:
-        openai_api_base = args.openai_api_base
+    openai_max_tokens = os.environ.get(f"{env_prefix}OPENAI_MAX_TOKENS", "1024")  # $env:OPENAI_MAX_TOKENS
+    if args.openai_max_tokens is not None:
+        openai_max_tokens = str(args.openai_max_tokens)
 
     openai_api_type = os.environ.get(f"{env_prefix}OPENAI_API_TYPE", openai.api_type)  # $env:OPENAI_API_TYPE
     if args.openai_api_type is not None:
         openai_api_type = args.openai_api_type
 
-    openai_proxy = os.environ.get(f"{env_prefix}OPENAI_PROXY", openai.api_version)  # $env:OPENAI_PROXY
+    openai_organization = None
+    if openai_api_type is not None and openai_api_type == openai.api_type:
+        openai_organization = os.environ.get(f"{env_prefix}OPENAI_ORGANIZATION", openai.organization)  # $env:OPENAI_ORGANIZATION
+
+    openai_api_base = os.environ.get(f"{env_prefix}OPENAI_API_BASE", openai.api_base)  # $env:OPENAI_API_BASE
+    if args.openai_api_base is not None:
+        openai_api_base = args.openai_api_base
+
+    openai_proxy = os.environ.get(f"{env_prefix}OPENAI_PROXY", None)  # $env:OPENAI_PROXY
     if args.openai_proxy is not None:
         openai_proxy = args.openai_proxy
 
@@ -112,6 +120,8 @@ def _get_openai_config(args: Namespace) -> Dict[str, Optional[str]]:
         "openai_api_base": openai_api_base,
         "openai_api_type": openai_api_type,
         "openai_proxy": openai_proxy,
+        "openai_model": openai_model,
+        "openai_max_tokens": openai_max_tokens,
     }
 
 
@@ -135,6 +145,7 @@ def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff
     if args.description is True:
         role_system.append("Add a short description to the commit message in the body section of why these changes were made.")
         role_system.append('Omit "This commit" at the beginning - briefly describe changes.')
+        role_system.append("Each sentence of the description should be in new line.")
     else:
         role_system.append("Do not describe changes; just simply output without any explanation - the final commit message MUST have only one line!")
 
@@ -163,6 +174,12 @@ def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff
 def get_openai_chat_response(messages: List[Dict[str, str]], args: Namespace) -> str:
     """Get OpenAI Chat Response."""
     config = _get_openai_config(args)
+    logging.debug(f"CONFIG: {config}")
+
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
+        _num_tokens_from_messages(messages, str(config["openai_model"]))
+        openai.debug = True
+
     openai.api_key = config["openai_api_key"]
     openai.organization = config["openai_organization"]
     openai.api_base = config["openai_api_base"]
@@ -172,17 +189,18 @@ def get_openai_chat_response(messages: List[Dict[str, str]], args: Namespace) ->
     # ref: https://platform.openai.com/docs/api-reference/chat-completions/create
     # ref: https://platform.openai.com/docs/guides/chat
     response = openai.ChatCompletion.create(
-        model=args.openai_chat_model,
+        model=config["openai_model"],
         messages=messages,
+        max_tokens=int(config["openai_max_tokens"]),
         temperature=0,
         top_p=0.1,
     )
     logging.debug(f"OPENAI_CHAT_RESPONSE: {response}")
 
-    return response.choices[0].message.content
+    return response["choices"][0]["message"]["content"]
 
 
-def num_tokens_from_messages(messages: List[Dict[str, str]], model: str) -> int:
+def _num_tokens_from_messages(messages: List[Dict[str, str]], model: str) -> int:
     """Return the number of tokens used by a list of messages."""
     try:
         encoding = tiktoken.encoding_for_model(model)
@@ -190,10 +208,10 @@ def num_tokens_from_messages(messages: List[Dict[str, str]], model: str) -> int:
         encoding = tiktoken.get_encoding("cl100k_base")
     if model == "gpt-3.5-turbo":
         # Warning: gpt-3.5-turbo may change over time. Returning num tokens assuming gpt-3.5-turbo-0301.
-        return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301")
+        return _num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301")
     if model == "gpt-4":
         # Warning: gpt-4 may change over time. Returning num tokens assuming gpt-4-0314.
-        return num_tokens_from_messages(messages, model="gpt-4-0314")
+        return _num_tokens_from_messages(messages, model="gpt-4-0314")
     if model == "gpt-3.5-turbo-0301":
         tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
         tokens_per_name = -1  # if there's a name, the role is omitted
@@ -234,8 +252,6 @@ def main() -> int:
         user_commit_message = get_user_commit_message(args.commit_msg_filename, args.prepare_commit_message_source)
         git_diff = get_git_diff(args.max_char_count, ".")
         openai_chat_prompt_messages = get_openai_chat_prompt_messages(user_commit_message, git_diff, args)
-        if logging.getLogger().isEnabledFor(logging.DEBUG):
-            num_tokens_from_messages(openai_chat_prompt_messages, args.openai_chat_model)
         openai_chat_response = get_openai_chat_response(openai_chat_prompt_messages, args)
         set_commit_message(args.commit_msg_filename, openai_chat_response)
     except Exception as error:
