@@ -213,8 +213,7 @@ def set_commit_message(commit_msg_file_path: str, commit_msg: str) -> None:
 
 def main() -> int:
     """Main function of module."""
-
-    global LOG
+    global LOG  # noqa: PLW0603
 
     args = get_args()
     LOG = logging.getLogger(__name__)
