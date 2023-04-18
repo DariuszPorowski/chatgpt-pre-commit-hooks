@@ -76,7 +76,7 @@ OpenAI API Key is mandatory to run hooks and has to be setup via an environment 
     - `OPENAI_API_TYPE` put `azure` to specified OpenAI provider
     - `OPENAI_API_KEY` for API Key
     - `OPENAI_API_BASE` for Endpoint
-    - `OPENAI_MODEL_NAME` for Model deployment name
+    - `OPENAI_MODEL` for Model deployment name
 
     Example:
 
@@ -84,7 +84,7 @@ OpenAI API Key is mandatory to run hooks and has to be setup via an environment 
     export OPENAI_API_TYPE="azure"
     export OPENAI_API_KEY="sk-xxxxxx"
     export OPENAI_API_BASE="https://xxxxxx.openai.azure.com/"
-    export OPENAI_MODEL_NAME="xxxxx-gpt-35-turbo"
+    export OPENAI_MODEL="xxxxx-gpt-35-turbo"
     ```
 
 > 💡 **HINT**
