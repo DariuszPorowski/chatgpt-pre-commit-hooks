@@ -30,7 +30,7 @@ jobs:
           python-version-file: .python-version
 
       - name: Install dependencies
-        run: pip install . .[dev]
+        run: pip install . .[build]
 
       - name: Build
         run: python -m build --wheel
@@ -79,7 +79,6 @@ jobs:
     name: PyPI Release (prod)
     needs:
       - build
-      - pypi-release-test
     environment:
       name: pypi-prod
       url: https://pypi.org/project/chatgpt-pre-commit-hooks

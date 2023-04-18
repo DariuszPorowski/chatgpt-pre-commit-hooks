@@ -5,10 +5,10 @@ A pre-commit hook that utilizes ChatGPT to summarize changes made to the codebas
 The commit message is then used to populate the commit message automatically.
 """
 
+import argparse
 import logging
 import os
 import sys
-from argparse import ArgumentParser, BooleanOptionalAction, Namespace
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -16,29 +16,44 @@ import openai
 import tiktoken
 from git.repo import Repo
 
-logging.basicConfig(level=logging.NOTSET)
-# logging.basicConfig(level=logging.DEBUG, filename="debug.log", filemode="w")  # noqa: ERA001
+logger = logging.getLogger(__name__)
 
 
-def get_args() -> Namespace:
+def get_args() -> argparse.Namespace:
     """Get input arguments."""
-    logging.debug(f"SYS_ARGV: {sys.argv}")
-    parser = ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument("commit_msg_filename", nargs="?", default=None)  # args.commit_msg_filename
     parser.add_argument("prepare_commit_message_source", nargs="?", default=None)  # args.prepare_commit_message_source
     parser.add_argument("commit_object_name", nargs="?", default=None)  # args.commit_object_name
     parser.add_argument("--max-char-count", type=int, default=10000)  # args.max_char_count
-    parser.add_argument("--emoji", action=BooleanOptionalAction, default=False)  # args.emoji
-    parser.add_argument("--description", action=BooleanOptionalAction, default=False)  # args.description
+    parser.add_argument("--emoji", action=argparse.BooleanOptionalAction, default=False)  # args.emoji
+    parser.add_argument("--description", action=argparse.BooleanOptionalAction, default=False)  # args.description
+    parser.add_argument("--log-level", choices=[key.lower() for key in logging._nameToLevel], default="warning", required=False)  # args.log_level  # noqa: SLF001
     parser.add_argument("--env-prefix", type=str, default=None, required=False)  # args.env_prefix
-    parser.add_argument("--openai-model", type=str, default=None, required=False)  # args.openai_model
-    parser.add_argument("--openai-max-tokens", type=int, default=None, required=False)  # args.openai_max_tokens
-    parser.add_argument("--openai-api-base", type=str, default=None, required=False)  # args.openai_api_base
-    parser.add_argument("--openai-api-type", type=str, default=None, required=False)  # args.openai_api_type
-    parser.add_argument("--openai-proxy", type=str, default=None, required=False)  # args.openai_proxy
-    args = parser.parse_args()
-    logging.debug(f"ARGS: {args}")
-    return args
+
+    temp_args = parser.parse_args()
+    env_prefix = ""
+    if temp_args.env_prefix is not None and temp_args.env_prefix:
+        env_prefix = f"{temp_args.env_prefix.upper()}__"
+
+    parser.add_argument("--openai-model", type=str, default=os.environ.get(f"{env_prefix}OPENAI_MODEL", "gpt-3.5-turbo"))  # args.openai_model
+    parser.add_argument("--openai-max-tokens", type=int, default=os.environ.get(f"{env_prefix}OPENAI_MAX_TOKENS", "1024"))  # args.openai_max_tokens
+    parser.add_argument("--openai-api-base", type=str, default=os.environ.get(f"{env_prefix}OPENAI_API_BASE", openai.api_base))  # args.openai_api_base
+    parser.add_argument("--openai-api-type", type=str, default=os.environ.get(f"{env_prefix}OPENAI_API_TYPE", openai.api_type))  # args.openai_api_type
+    parser.add_argument("--openai-proxy", type=str, default=os.environ.get(f"{env_prefix}OPENAI_PROXY", None), required=False)  # args.openai_proxy
+    parser.add_argument("--openai-api-key", type=str, default=os.environ.get(f"{env_prefix}OPENAI_API_KEY", openai.api_key), help=argparse.SUPPRESS)  # args.openai_api_key
+
+    openai_api_type = parser.parse_args().openai_api_type
+    if openai_api_type == openai.api_type:
+        parser.add_argument(
+            "--openai-organization",
+            type=str,
+            default=os.environ.get(f"{env_prefix}OPENAI_ORGANIZATION", openai.organization),
+            help=argparse.SUPPRESS,
+            required=False,
+        )  # args.openai_organization
+
+    return parser.parse_args()
 
 
 def get_git_diff(max_char_count: int, git_repo_path: str) -> str:
@@ -51,13 +66,13 @@ def get_git_diff(max_char_count: int, git_repo_path: str) -> str:
     diff = repo.git.diff(staged=True)
     if len(diff) > max_char_count:
         diff = repo.git.diff(staged=True, stat=True)
-    logging.debug(f"GIT_DIFF: {diff}")
+    logger.debug(f"GIT_DIFF: {diff}")
     return diff
 
 
 def get_user_commit_message(commit_msg_file_path: str, prepare_commit_message_source: Optional[str]) -> Optional[str]:
     """Get user commit message (if specified)."""
-    logging.debug(f"PREPARE_COMMIT_MESSAGE_SOURCE: {prepare_commit_message_source}")
+    logger.debug(f"PREPARE_COMMIT_MESSAGE_SOURCE: {prepare_commit_message_source}")
     user_commit_message = None
     if prepare_commit_message_source == "message" or prepare_commit_message_source is None:
         commit_msg_file = Path(commit_msg_file_path)
@@ -68,7 +83,7 @@ def get_user_commit_message(commit_msg_file_path: str, prepare_commit_message_so
         if lines != []:
             user_commit_message = "".join(lines).strip()
 
-    logging.debug(f"USER_COMMIT_MESSAGE: {user_commit_message}")
+    logger.debug(f"USER_COMMIT_MESSAGE: {user_commit_message}")
 
     if user_commit_message is not None:
         skip_keywords = ["#no-ai", "#no-openai", "#no-chatgpt", "#no-gpt", "#skip-ai", "#skip-openai", "#skip-chatgpt", "#skip-gpt"]
@@ -79,53 +94,7 @@ def get_user_commit_message(commit_msg_file_path: str, prepare_commit_message_so
     return user_commit_message
 
 
-def _get_openai_config(args: Namespace) -> Dict[str, Optional[str]]:
-    """Get OpenAI API Key from environment variable."""
-    env_prefix = ""
-    if args.env_prefix is not None:
-        env_prefix = f"{args.env_prefix.upper()}__"
-
-    # https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety
-    openai_api_key = os.environ.get(f"{env_prefix}OPENAI_API_KEY", openai.api_key)  # $env:OPENAI_API_KEY
-    if openai_api_key is None or not openai_api_key:
-        raise ValueError(f"`{env_prefix}OPENAI_API_KEY` environment variable is not set.")
-
-    openai_model = os.environ.get(f"{env_prefix}OPENAI_MODEL", "gpt-3.5-turbo")  # $env:OPENAI_MODEL
-    if args.openai_model is not None:
-        openai_model = args.openai_model
-
-    openai_max_tokens = os.environ.get(f"{env_prefix}OPENAI_MAX_TOKENS", "1024")  # $env:OPENAI_MAX_TOKENS
-    if args.openai_max_tokens is not None:
-        openai_max_tokens = str(args.openai_max_tokens)
-
-    openai_api_type = os.environ.get(f"{env_prefix}OPENAI_API_TYPE", openai.api_type)  # $env:OPENAI_API_TYPE
-    if args.openai_api_type is not None:
-        openai_api_type = args.openai_api_type
-
-    openai_organization = None
-    if openai_api_type is not None and openai_api_type == openai.api_type:
-        openai_organization = os.environ.get(f"{env_prefix}OPENAI_ORGANIZATION", openai.organization)  # $env:OPENAI_ORGANIZATION
-
-    openai_api_base = os.environ.get(f"{env_prefix}OPENAI_API_BASE", openai.api_base)  # $env:OPENAI_API_BASE
-    if args.openai_api_base is not None:
-        openai_api_base = args.openai_api_base
-
-    openai_proxy = os.environ.get(f"{env_prefix}OPENAI_PROXY", None)  # $env:OPENAI_PROXY
-    if args.openai_proxy is not None:
-        openai_proxy = args.openai_proxy
-
-    return {
-        "openai_api_key": openai_api_key,
-        "openai_organization": openai_organization,
-        "openai_api_base": openai_api_base,
-        "openai_api_type": openai_api_type,
-        "openai_proxy": openai_proxy,
-        "openai_model": openai_model,
-        "openai_max_tokens": openai_max_tokens,
-    }
-
-
-def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff: str, args: Namespace) -> List[Dict[str, str]]:
+def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff: str, emoji: bool, description: bool) -> List[Dict[str, str]]:  # noqa: FBT001
     """Get prompt messages."""
     role_system = [
         "You are a software engineer assistant to write a 'Commit message with scope'.",
@@ -135,14 +104,14 @@ def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff
     role_user = [git_diff]
 
     # GitMoji
-    if args.emoji is True:
+    if emoji is True:
         role_system.append("Use the 'GitMoji convention' to preface the commit with the UNICODE characters format.")
         role_system.append("Do not use shortcode representation.")
     else:
         role_system.append("Do not preface the commit message with anything.")
 
     # description
-    if args.description is True:
+    if description is True:
         role_system.append("Add a short description to the commit message in the body section of why these changes were made.")
         role_system.append('Omit "This commit" at the beginning - briefly describe changes.')
         role_system.append("Each sentence of the description should be in new line.")
@@ -162,8 +131,8 @@ def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff
     role_system_prompt = " ".join(role_system)
     role_user_prompt = " ".join(role_user)
 
-    logging.debug(f"ROLE_SYSTEM_PROMPT: {role_system_prompt}")
-    logging.debug(f"ROLE_USER_PROMPT: {role_user_prompt}")
+    logger.debug(f"ROLE_SYSTEM_PROMPT: {role_system_prompt}")
+    logger.debug(f"ROLE_USER_PROMPT: {role_user_prompt}")
 
     return [
         {"role": "system", "content": role_system_prompt},
@@ -171,31 +140,28 @@ def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff
     ]
 
 
-def get_openai_chat_response(messages: List[Dict[str, str]], args: Namespace) -> str:
+def get_openai_chat_response(messages: List[Dict[str, str]], args: argparse.Namespace) -> str:
     """Get OpenAI Chat Response."""
-    config = _get_openai_config(args)
-    logging.debug(f"CONFIG: {config}")
-
-    if logging.getLogger().isEnabledFor(logging.DEBUG):
-        _num_tokens_from_messages(messages, str(config["openai_model"]))
+    if logger.isEnabledFor(logging.DEBUG):
+        _num_tokens_from_messages(messages, str(args.openai_model))
         openai.debug = True
 
-    openai.api_key = config["openai_api_key"]
-    openai.organization = config["openai_organization"]
-    openai.api_base = config["openai_api_base"]
-    openai.api_type = config["openai_api_type"]
-    openai.proxy = config["openai_proxy"]
+    openai.api_key = args.openai_api_key
+    openai.organization = args.openai_organization
+    openai.api_base = args.openai_api_base
+    openai.api_type = args.openai_api_type
+    openai.proxy = args.openai_proxy
 
     # ref: https://platform.openai.com/docs/api-reference/chat-completions/create
     # ref: https://platform.openai.com/docs/guides/chat
     response = openai.ChatCompletion.create(
-        model=config["openai_model"],
+        model=args.openai_model,
         messages=messages,
-        max_tokens=int(config["openai_max_tokens"]),
+        max_tokens=int(args.openai_max_tokens),
         temperature=0,
         top_p=0.1,
     )
-    logging.debug(f"OPENAI_CHAT_RESPONSE: {response}")
+    logger.debug(f"OPENAI_CHAT_RESPONSE: {response}")
 
     return response["choices"][0]["message"]["content"]
 
@@ -231,7 +197,7 @@ def _num_tokens_from_messages(messages: List[Dict[str, str]], model: str) -> int
             if key == "name":
                 num_tokens += tokens_per_name
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
-    logging.debug(f"NUM_TOKENS: {num_tokens}")
+    logger.debug(f"NUM_TOKENS: {num_tokens}")
     return num_tokens
 
 
@@ -245,13 +211,12 @@ def set_commit_message(commit_msg_file_path: str, commit_msg: str) -> None:
     commit_msg_file_wrapper.close()
 
 
-def main() -> int:
+def main(args: argparse.Namespace) -> int:
     """Main function of module."""
     try:
-        args = get_args()
         user_commit_message = get_user_commit_message(args.commit_msg_filename, args.prepare_commit_message_source)
         git_diff = get_git_diff(args.max_char_count, ".")
-        openai_chat_prompt_messages = get_openai_chat_prompt_messages(user_commit_message, git_diff, args)
+        openai_chat_prompt_messages = get_openai_chat_prompt_messages(user_commit_message, git_diff, args.emoji, args.description)
         openai_chat_response = get_openai_chat_response(openai_chat_prompt_messages, args)
         set_commit_message(args.commit_msg_filename, openai_chat_response)
     except Exception as error:
@@ -261,4 +226,15 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    args = get_args()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(args.log_level.upper())
+
+    if logger.isEnabledFor(logging.DEBUG):
+        fh = logging.FileHandler(filename="debug.log", mode="w")
+        logger.addHandler(fh)
+
+    logger.debug(f"SYS_ARGV: {sys.argv}")
+    logger.debug(f"ARGS: {args}")
+
+    sys.exit(main(args))

@@ -23,6 +23,7 @@ Pre-commit hooks collection that utilizes ChatGPT and OpenAI platform to validat
   - [Arguments](#arguments)
   - [`--env-prefix`](#--env-prefix)
   - [Variables precedence](#variables-precedence)
+- [💸 Payments](#-payments)
 - [👥 Contributing](#-contributing)
 - [📄 License](#-license)
 
@@ -173,7 +174,7 @@ repos:
    - or include it in a `requirements.txt` file in your project:
 
      ```text
-     chatgpt-pre-commit-hooks~=0.1.0
+     chatgpt-pre-commit-hooks~=0.1.1
      ```
 
       and run:
@@ -274,11 +275,20 @@ For instance, if your prefix is `personal`, then the environment variable must b
 
 Example:
 
+```shell
+export PERSONAL__OPENAI_API_KEY="sk-xxxxxx"
+export WORK__OPENAI_API_KEY="sk-xxxxxx"
+```
+
 ### Variables precedence
 
 1. hard-coded args, e.g. `--openai-max-tokens`
 1. prefixed environment variable, e.g. `PERSONAL__OPENAI_MAX_TOKENS`
 1. global environment variable, e.g. `OPENAI_MAX_TOKENS`
+
+## 💸 Payments
+
+Project by default uses `gpt-3.5-turbo` model because of [its lower cost](https://openai.com/pricing). You have to pay for your own OpenAI API requests.
 
 ## 👥 Contributing
 

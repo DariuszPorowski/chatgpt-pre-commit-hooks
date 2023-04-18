@@ -32,7 +32,7 @@ To contribute, please follow these steps:
     .venv\Scripts\Activate.ps1
 
     # install project dependencies
-    pip install . .[dev]
+    pip install . .[dev] .[build]
 
     # do test build
     python -m build --wheel
