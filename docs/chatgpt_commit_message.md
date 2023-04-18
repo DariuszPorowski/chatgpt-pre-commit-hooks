@@ -6,6 +6,12 @@ Hook that uses OpenAI's ChatGPT API to generate a summary of changes made to a c
 
 Commit message structure based on [`Commit message with scope`](https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-scope) convention from [Conventional Commits](https://www.conventionalcommits.org).
 
+- [Setup](#setup)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Skip suggestions](#skip-suggestions)
+- [References](#references)
+
 ## Setup
 
 This hook runs on the `prepare-commit-msg` stage and requires to be explicitly enabled. Unfortunately, the standard `pre-commit install` does not support the hook. To enable prepare-commit-msg support, please run the following:
@@ -30,13 +36,13 @@ repos:
 
 ## Configuration
 
-The hook can take optional arguments.
+The hook uses global configuration settings or arguments specified in the [📥 Prerequisites setup](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/README.md#-prerequisites-setup) and [🛠️ Advanced configuration](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/README.md#️-advanced-configuration) sections and takes own optional arguments listed below:
 
-| Name               | Type | Default | Description                                                                                                                                                                                             |
-|:-------------------|:----:|:-------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--max-char-count` | int  |  10000  | Send `git diff --staged --stat` results instead of the full diff of staged changes if the diff length is more than NNN characters                                                                       |
-| `--emoji`          | bool |  false  | Use [GitMoji](https://gitmoji.dev) to preface commit message 💥                                                                                                                                         |
-| `--description`    | bool |  false  | Add short changes summary description to the commit (see, [Commit message with description](https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-description-and-breaking-change-footer)) |
+| Name               | Type | Default | Description                                                                                                                                                                                                                                           |
+|:-------------------|:----:|:-------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--max-char-count` | int  |  10000  | Send `git diff --staged --stat` results instead of the full diff of staged changes if the diff length is more than NNN characters                                                                                                                     |
+| `--emoji`          | bool |  false  | Use [GitMoji](https://gitmoji.dev) to preface commit message. Flag type argument, if it exists, it's True.💥                                                                                                                                          |
+| `--description`    | bool |  false  | Add short changes summary description to the commit (see, [Commit message with description](https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-description-and-breaking-change-footer)). Flag type argument, if it exists, it's True. |
 
 Example:
 
@@ -47,10 +53,29 @@ repos:
     hooks:
       - id: chatgpt-commit-message
         args:
+          - "--emoji"
           - "--max-char-count"
           - "500"
-          - "--emoji"
           - "--description"
+```
+
+## Usage
+
+Staged changes and commit:
+
+```shell
+git add <files...>
+git commit
+```
+
+Example commit message prefaced with GitMoji and description:
+
+```md
+✨ feat(scope): add pre-commit hooks and VSCode settings
+
+This commit adds pre-commit hooks and VSCode settings to improve code quality and consistency.
+The `.pre-commit-hooks.yaml` file contains hooks for linting, formatting, and checking for security vulnerabilities.
+The `.vscode/settings.json` file includes settings for linting and formatting on save.
 ```
 
 ## Skip suggestions
