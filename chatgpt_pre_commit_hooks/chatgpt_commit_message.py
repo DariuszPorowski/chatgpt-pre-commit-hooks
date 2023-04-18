@@ -16,7 +16,7 @@ import openai
 import tiktoken
 from git.repo import Repo
 
-logger = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def get_args() -> argparse.Namespace:
@@ -66,13 +66,13 @@ def get_git_diff(max_char_count: int, git_repo_path: str) -> str:
     diff = repo.git.diff(staged=True)
     if len(diff) > max_char_count:
         diff = repo.git.diff(staged=True, stat=True)
-    logger.debug(f"GIT_DIFF: {diff}")
+    LOG.debug(f"GIT_DIFF: {diff}")
     return diff
 
 
 def get_user_commit_message(commit_msg_file_path: str, prepare_commit_message_source: Optional[str]) -> Optional[str]:
     """Get user commit message (if specified)."""
-    logger.debug(f"PREPARE_COMMIT_MESSAGE_SOURCE: {prepare_commit_message_source}")
+    LOG.debug(f"PREPARE_COMMIT_MESSAGE_SOURCE: {prepare_commit_message_source}")
     user_commit_message = None
     if prepare_commit_message_source == "message" or prepare_commit_message_source is None:
         commit_msg_file = Path(commit_msg_file_path)
@@ -83,7 +83,7 @@ def get_user_commit_message(commit_msg_file_path: str, prepare_commit_message_so
         if lines != []:
             user_commit_message = "".join(lines).strip()
 
-    logger.debug(f"USER_COMMIT_MESSAGE: {user_commit_message}")
+    LOG.debug(f"USER_COMMIT_MESSAGE: {user_commit_message}")
 
     if user_commit_message is not None:
         skip_keywords = ["#no-ai", "#no-openai", "#no-chatgpt", "#no-gpt", "#skip-ai", "#skip-openai", "#skip-chatgpt", "#skip-gpt"]
@@ -131,8 +131,8 @@ def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff
     role_system_prompt = " ".join(role_system)
     role_user_prompt = " ".join(role_user)
 
-    logger.debug(f"ROLE_SYSTEM_PROMPT: {role_system_prompt}")
-    logger.debug(f"ROLE_USER_PROMPT: {role_user_prompt}")
+    LOG.debug(f"ROLE_SYSTEM_PROMPT: {role_system_prompt}")
+    LOG.debug(f"ROLE_USER_PROMPT: {role_user_prompt}")
 
     return [
         {"role": "system", "content": role_system_prompt},
@@ -142,7 +142,7 @@ def get_openai_chat_prompt_messages(user_commit_message: Optional[str], git_diff
 
 def get_openai_chat_response(messages: List[Dict[str, str]], args: argparse.Namespace) -> str:
     """Get OpenAI Chat Response."""
-    if logger.isEnabledFor(logging.DEBUG):
+    if LOG.isEnabledFor(logging.DEBUG):
         _num_tokens_from_messages(messages, str(args.openai_model))
         openai.debug = True
 
@@ -161,7 +161,7 @@ def get_openai_chat_response(messages: List[Dict[str, str]], args: argparse.Name
         temperature=0,
         top_p=0.1,
     )
-    logger.debug(f"OPENAI_CHAT_RESPONSE: {response}")
+    LOG.debug(f"OPENAI_CHAT_RESPONSE: {response}")
 
     return response["choices"][0]["message"]["content"]
 
@@ -197,7 +197,7 @@ def _num_tokens_from_messages(messages: List[Dict[str, str]], model: str) -> int
             if key == "name":
                 num_tokens += tokens_per_name
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
-    logger.debug(f"NUM_TOKENS: {num_tokens}")
+    LOG.debug(f"NUM_TOKENS: {num_tokens}")
     return num_tokens
 
 
@@ -211,8 +211,21 @@ def set_commit_message(commit_msg_file_path: str, commit_msg: str) -> None:
     commit_msg_file_wrapper.close()
 
 
-def main(args: argparse.Namespace) -> int:
+def main() -> int:
     """Main function of module."""
+    global LOG  # noqa: PLW0603
+
+    args = get_args()
+    LOG = logging.getLogger(__name__)
+    LOG.setLevel(args.log_level.upper())
+
+    if LOG.isEnabledFor(logging.DEBUG):
+        fh = logging.FileHandler(filename="debug.log", mode="w")
+        LOG.addHandler(fh)
+
+    LOG.debug(f"SYS_ARGV: {sys.argv}")
+    LOG.debug(f"ARGS: {args}")
+
     try:
         user_commit_message = get_user_commit_message(args.commit_msg_filename, args.prepare_commit_message_source)
         git_diff = get_git_diff(args.max_char_count, ".")
@@ -226,15 +239,4 @@ def main(args: argparse.Namespace) -> int:
 
 
 if __name__ == "__main__":
-    args = get_args()
-    logger = logging.getLogger(__name__)
-    logger.setLevel(args.log_level.upper())
-
-    if logger.isEnabledFor(logging.DEBUG):
-        fh = logging.FileHandler(filename="debug.log", mode="w")
-        logger.addHandler(fh)
-
-    logger.debug(f"SYS_ARGV: {sys.argv}")
-    logger.debug(f"ARGS: {args}")
-
-    sys.exit(main(args))
+    sys.exit(main())

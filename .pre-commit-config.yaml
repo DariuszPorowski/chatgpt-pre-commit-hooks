@@ -31,4 +31,6 @@ repos:
           - "500"
           - "--emoji"
           - "--description"
+          - "--log-level"
+          - "debug"
         stages: [prepare-commit-msg]

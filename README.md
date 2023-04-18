@@ -152,7 +152,7 @@ Example:
 ```yaml
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
-    rev: v0.1.1
+    rev: v0.1.2
     hooks:
       - id: chatgpt-commit-message
 ```
@@ -174,7 +174,7 @@ repos:
    - or include it in a `requirements.txt` file in your project:
 
      ```text
-     chatgpt-pre-commit-hooks~=0.1.1
+     chatgpt-pre-commit-hooks~=0.1.2
      ```
 
       and run:
@@ -204,25 +204,25 @@ repos:
 
 1. Add to your `.pre-commit-config.yaml`
 
-    ```yml
+    ```yaml
     repos:
       - repo: local
         hooks:
-          - id: ... # follow 🎣 Hooks section to see available hooks IDs
-            name: Run chatgpt-pre-commit-hooks (<name>)
-            entry: chatgpt-pre-commit-hooks.<id> # follow 🎣 Hooks section to see available hooks IDs
+          - id: <id> # follow 🎣 Hooks section to see available hooks IDs
+            name: Run <name>
+            entry: <id> # follow 🎣 Hooks section to see available hooks IDs
             language: system
     ```
 
     Example:
 
-    ```yml
+    ```yaml
     repos:
-      - repo: local
+    - repo: local
         hooks:
-          - id: chatgpt-commit-message
-            name: Run chatgpt-pre-commit-hooks (chatgpt-commit-message)
-            entry: chatgpt-pre-commit-hooks.chatgpt-commit-message
+      - id: chatgpt-commit-message
+            name: Run ChatGPT commit-message
+            entry: chatgpt-commit-message
             language: system
     ```
 
