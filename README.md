@@ -44,9 +44,9 @@ OpenAI API Key is mandatory to run hooks and has to be setup via an environment 
 
 1. Create your [API Key](https://platform.openai.com/account/api-keys), and get your Organization ID from [Organization settings](https://platform.openai.com/account/org-settings)
 
-    ![OpenAI API Key](https://github.com/dariuszporowski/chatgpt-pre-commit-hooks/blob/main/assets/images/openai-platform-api-key.png)
+    ![OpenAI API Key](https://raw.githubusercontent.com/dariuszporowski/chatgpt-pre-commit-hooks/main/assets/images/openai-platform-api-key.png)
 
-    ![OpenAI Organization ID](https://github.com/dariuszporowski/chatgpt-pre-commit-hooks/blob/main/assets/images/openai-platform-org-id.png)
+    ![OpenAI Organization ID](https://raw.githubusercontent.com/dariuszporowski/chatgpt-pre-commit-hooks/main/assets/images/openai-platform-org-id.png)
 
 1. Store values as an environment variables:
     - `OPENAI_API_KEY` for API Key
@@ -67,9 +67,9 @@ OpenAI API Key is mandatory to run hooks and has to be setup via an environment 
 
 1. Go to [Azure Portal](https://portal.azure.com), and get `API Key`, `Endpoint` and `Model deployment name`
 
-    ![Azure OpenAI API Key and Endpoint](https://github.com/dariuszporowski/chatgpt-pre-commit-hooks/blob/main/assets/images/azure-openai-service-key-endpoint.png)
+    ![Azure OpenAI API Key and Endpoint](https://raw.githubusercontent.com/dariuszporowski/chatgpt-pre-commit-hooks/main/assets/images/azure-openai-service-key-endpoint.png)
 
-    ![Azure OpenAI Model](https://github.com/dariuszporowski/chatgpt-pre-commit-hooks/blob/main/assets/images/azure-openai-service-models.png)
+    ![Azure OpenAI Model](https://raw.githubusercontent.com/dariuszporowski/chatgpt-pre-commit-hooks/main/assets/images/azure-openai-service-models.png)
 
 1. Store values as an environment variables:
     - `OPENAI_API_TYPE` put `azure` to specified OpenAI provider
