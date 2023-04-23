@@ -6,26 +6,27 @@ Hook that uses OpenAI's ChatGPT API to generate a summary of changes made to a c
 
 Commit message structure based on [`Commit message with scope`](https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-scope) convention from [Conventional Commits](https://www.conventionalcommits.org).
 
-- [Setup](#setup)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Skip suggestions](#skip-suggestions)
-- [References](#references)
+![chatgpt-commit-message](https://raw.githubusercontent.com/dariuszporowski/chatgpt-pre-commit-hooks/main/docs/assets/demos/chatgpt_commit_message.gif)
 
-## Setup
+- [📦 Setup](#-setup)
+- [⚙️ Configuration](#️-configuration)
+- [💪 Usage](#-usage)
+- [🚫 Skip suggestions](#-skip-suggestions)
+- [🌐 References](#-references)
 
-This hook runs on the `prepare-commit-msg` stage and requires to be explicitly enabled. Unfortunately, the standard `pre-commit install` does not support the hook. To enable prepare-commit-msg support, please run the following:
+## 📦 Setup
 
-```shell
-pre-commit install --hook-type prepare-commit-msg
-```
+This hook runs on the `prepare-commit-msg` stage and requires to be explicitly enabled. The standard `pre-commit install` doesn't support the hook. To enable prepare-commit-msg support, add `default_install_hook_types` section with hook configuration:
 
 Add to your `.pre-commit-config.yaml`
 
 ```yaml
+default_install_hook_types:
+  - pre-commit
+  - prepare-commit-msg
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
-    rev: v0.1.2 # Use the ref you want to point at, see ⚠️ NOTE below!
+    rev: v0.1.3 # Use the ref you want to point at, see ⚠️ NOTE below!
     hooks:
       - id: chatgpt-commit-message
 ```
@@ -34,22 +35,31 @@ repos:
 >
 > For the `rev:` always try to use the latest version. You can check the latest release under [GitHub Releases](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/releases/latest)
 
-## Configuration
+and run:
+
+```shell
+pre-commit install
+```
+
+## ⚙️ Configuration
 
 The hook uses global configuration settings or arguments specified in the [📥 Prerequisites setup](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/README.md#-prerequisites-setup) and [🛠️ Advanced configuration](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/README.md#️-advanced-configuration) sections and takes own optional arguments listed below:
 
 | Name               | Type | Default | Description                                                                                                                                                                                                                                           |
 |:-------------------|:----:|:-------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--max-char-count` | int  |  10000  | Send `git diff --staged --stat` results instead of the full diff of staged changes if the diff length is more than NNN characters                                                                                                                     |
-| `--emoji`          | bool |  false  | Use [GitMoji](https://gitmoji.dev) to preface commit message. Flag type argument, if it exists, it's True.💥                                                                                                                                          |
-| `--description`    | bool |  false  | Add short changes summary description to the commit (see, [Commit message with description](https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-description-and-breaking-change-footer)). Flag type argument, if it exists, it's True. |
+| `--max-char-count` | `int`  |  10000  | Send `git diff --staged --stat` results instead of the full diff of staged changes if the diff length is more than NNN characters                                                                                                                     |
+| `--emoji`          | `bool` |  false  | Use [GitMoji](https://gitmoji.dev) to preface commit message. Flag type argument, if it exists, it's True.💥                                                                                                                                          |
+| `--description`    | `bool` |  false  | Add short changes summary description to the commit (see, [Commit message with description](https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-description-and-breaking-change-footer)). Flag type argument, if it exists, it's True. |
 
 Example:
 
 ```yaml
+default_install_hook_types:
+  - pre-commit
+  - prepare-commit-msg
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
-    rev: v0.1.2 # Use the ref you want to point at, see ⚠️ NOTE below!
+    rev: v0.1.3 # Use the ref you want to point at, see ⚠️ NOTE below!
     hooks:
       - id: chatgpt-commit-message
         args:
@@ -59,7 +69,7 @@ repos:
           - "--description"
 ```
 
-## Usage
+## 💪 Usage
 
 Staged changes and commit:
 
@@ -78,9 +88,9 @@ The `.pre-commit-hooks.yaml` file contains hooks for linting, formatting, and ch
 The `.vscode/settings.json` file includes settings for linting and formatting on save.
 ```
 
-## Skip suggestions
+## 🚫 Skip suggestions
 
-If your **commit message** includes one of the keywords: `#no-ai`, `#no-openai`, `#no-chatgpt`, `#no-gpt`, `#skip-ai`, `#skip-openai`, `#skip-chatgpt`, `#skip-gpt`, then the commit suggestion will be skipped without any request to OpenAI service, and the pre-commit hook will pass.OpenAI service, and pre-commit hook will pass.
+If your **commit message** includes one of the keywords: `#no-ai`, `#no-openai`, `#no-chatgpt`, `#no-gpt`, `#skip-ai`, `#skip-openai`, `#skip-chatgpt`, `#skip-gpt`, then the commit suggestion will be skipped without any request to OpenAI service, and the pre-commit hook will pass.
 
 Example:
 
@@ -88,7 +98,7 @@ Example:
 Update typos in docs #no-gpt
 ```
 
-## References
+## 🌐 References
 
 - [Conventional Commits](https://www.conventionalcommits.org)
 - [GitMoji](https://gitmoji.dev)

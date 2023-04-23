@@ -1,3 +1,6 @@
+default_install_hook_types:
+  - pre-commit
+  - prepare-commit-msg
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -10,27 +13,48 @@ repos:
       - id: check-yaml
       - id: debug-statements
 
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.16.3
+    hooks:
+      - id: gitleaks
+        verbose: true
+
   - repo: meta
     hooks:
       - id: check-hooks-apply
+        verbose: true
       - id: check-useless-excludes
+        verbose: true
       - id: identity
+        verbose: true
 
   - repo: local
     hooks:
       - id: chatgpt-commit-message
-        name: Run chatgpt-commit-message
-        entry: chatgpt_pre_commit_hooks/chatgpt_commit_message.py
+        name: ChatGPT commit message
+        entry: python -m chatgpt_pre_commit_hooks.main
         language: python
-        additional_dependencies:
-          ["openai>=0.27.4", "tiktoken>=0.3.3", "GitPython>=3.1.31"]
+        language_version: python3
+        additional_dependencies: ["openai>=0.27.4", "tiktoken>=0.3.3"]
         args:
+          - "--hook"
+          - "chatgpt-commit-message"
+          - "--log-level"
+          - "debug"
           - "--env-prefix"
-          - "personal"
+          - "work"
           - "--max-char-count"
           - "500"
           - "--emoji"
           - "--description"
-          - "--log-level"
-          - "debug"
         stages: [prepare-commit-msg]
+        verbose: true
+
+  # - repo: https://github.com/commit-check/commit-check
+  #   rev: v0.5.6
+  #   hooks:
+  #     - id: check-message
+  #       verbose: true
+  #     - id: check-branch
+  #     - id: check-author-name
+  #     - id: check-author-email

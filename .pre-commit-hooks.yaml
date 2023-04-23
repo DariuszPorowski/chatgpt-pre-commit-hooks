@@ -1,11 +1,14 @@
 # ref: https://pre-commit.com/#creating-new-hooks
 - id: chatgpt-commit-message
   name: ChatGPT commit message
-  description: A pre-commit hook that utilizes ChatGPT to summarize changes made to the codebase and provide commit message
+  description: Use ChatGPT to summarize changes made to the codebase and provide commit message.
   entry: chatgpt-commit-message
+  # args:
+  #   - "--hook"
+  #   - "chatgpt-commit-message"
   language: python
   language_version: python3
-  additional_dependencies:
-    ["openai~=0.27.4", "tiktoken~=0.3.3", "GitPython~=3.1.31"]
+  pass_filenames: false
   always_run: true
+  additional_dependencies: ["openai~=0.27.4", "tiktoken~=0.3.3"]
   stages: [prepare-commit-msg]

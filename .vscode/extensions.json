@@ -19,6 +19,7 @@
 		"donjayamanne.python-environment-manager",
 		"littlefoxteam.vscode-python-test-adapter",
 		"donjayamanne.git-extension-pack",
-		"VisualStudioExptTeam.vscodeintellicode"
+		"VisualStudioExptTeam.vscodeintellicode",
+		"chrischinchilla.vale-vscode"
 	]
 }

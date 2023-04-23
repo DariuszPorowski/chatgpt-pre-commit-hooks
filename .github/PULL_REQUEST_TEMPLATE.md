@@ -2,7 +2,7 @@
 
 <!-- Add a more detailed description of the changes if needed. -->
 
-## 🩹 Related issue
+## 🔗 Related issue
 
 <!-- If your PR refers to a related issue, link it here. -->
 Fixes: #

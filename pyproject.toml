@@ -28,37 +28,49 @@ classifiers = [
 	"Topic :: Software Development :: Version Control",
 	"Topic :: Software Development :: Version Control :: Git",
 ]
-dependencies = ["openai~=0.27.4", "tiktoken~=0.3.3", "GitPython~=3.1.31"]
+dependencies = ["openai~=0.27.4", "tiktoken~=0.3.3"]
 
 [project.urls]
 "Homepage" = "https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/README.md"
 "Bug Tracker" = "https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/issues"
 
 [project.optional-dependencies]
-dev = ["ruff", "mypy", "pre-commit"]
+dev = ["ruff", "mypy", "pre-commit", "pyyaml", "types-PyYAML"]
 build = ["build", "wheel", "twine"]
 
 [project.scripts]
-chatgpt-commit-message = "chatgpt_pre_commit_hooks.chatgpt_commit_message:main"
+chatgpt-commit-message = "chatgpt_pre_commit_hooks.hook_chatgpt_commit_message:main"
+chatgpt-pre-commit-hooks = "chatgpt_pre_commit_hooks.main:main"
 
 [build-system]
 requires = ["setuptools", "build", "setuptools_scm[toml]"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+zip-safe = false
+# packages = ["chatgpt_pre_commit_hooks"]
+
 [tool.setuptools.packages.find]
+include = ["chatgpt_pre_commit_hooks"]
 exclude = ["tests*", ".*"]
 
 [tool.setuptools_scm]
+# It would be nice to include the commit hash in the version, but that can't be done in a PEP 440-compatible way.
+version_scheme = "no-guess-dev"
+# Test PyPI does not support local versions.
+local_scheme = "no-local-version"
+fallback_version = "0.0.0"
 
 [tool.ruff]
 # https://beta.ruff.rs/docs/settings/
 select = ["ALL"]
 line-length = 180
-target-version = "py38"
+target-version = "py39"
 format = "grouped"
 show-fixes = true
 force-exclude = true
-ignore = ["G004", "TRY003", "EM102", "BLE001"]
+ignore = ["ANN101", "G004"]     #, "TRY003", "EM102", "BLE001", "EXE002"]
+exclude = [".github/scripts/*"]
 
 [tool.ruff.pycodestyle]
 max-doc-length = 180
@@ -84,21 +96,21 @@ exclude_globs = [".venv"]
 
 [tool.isort]
 # https://pycqa.github.io/isort/docs/configuration/options.html
-py_version = 38
+py_version = 39
 profile = "black"
 
 [tool.black]
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-format
-target-version = ["py38"]
+target-version = ["py39"]
 line-length = 180
 
 [tool.pylint]
 # https://pylint.readthedocs.io/en/latest/user_guide/configuration/all-options.html
-py-version = "3.8"
+py-version = "3.9"
 ignore = [".venv"]
 max-line-length = 180
 recursive = true
-disable = ["W1203", "W0212"]
+disable = ["W1203", "W0212", "R0903", "W0612"]
 
 [tool.pydocstyle]
 # https://www.pydocstyle.org/en/stable/usage.html#available-options
@@ -106,7 +118,7 @@ convention = "google"
 
 [tool.mypy]
 # https://mypy.readthedocs.io/en/stable/config_file.html
-python_version = "3.8"
+python_version = "3.9"
 exclude = [".venv"]
 disallow_any_unimported = true
 show_column_numbers = true
@@ -115,6 +127,7 @@ pretty = true
 explicit_package_bases = true
 ignore_missing_imports = true
 follow_imports = "silent"
+show_error_codes = true
 
 [tool.bandit]
 # https://bandit.readthedocs.io/en/latest/config.html#bandit-settings

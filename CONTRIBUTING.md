@@ -7,7 +7,7 @@ I appreciate your interest in contributing to the project! This document outline
 To contribute, please follow these steps:
 
 1. Fork the project name repository on GitHub.
-1. Create a new branch for your feature or bugfix.
+1. Create a new branch for your feature or bug fix.
 1. Setup development environment.
 
     ```shell
@@ -32,10 +32,10 @@ To contribute, please follow these steps:
     .venv\Scripts\Activate.ps1
 
     # install project dependencies
-    pip install . .[dev] .[build]
+    pip install .[dev] .[build]
 
     # do test build
-    python -m build --wheel
+    python3 -m pip wheel --no-deps -w dist .
     ```
 
 1. Make your changes and commit them with descriptive commit messages; check [Conventional Commits](https://www.conventionalcommits.org) as a suggestion.
