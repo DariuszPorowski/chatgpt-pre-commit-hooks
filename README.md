@@ -4,7 +4,7 @@
 [![PyPI - version][pypi-version-image]][pypi-version-link]
 [![PyPI - python version][pypi-pyversions-image]][pypi-pyversions-link]
 [![PyPI - downloads][pypi-stats-image]][pypi-stats-link]
-[![GitHub - ci][github-ci-image]][github-ci-link]
+[![GitHub - CI][github-ci-image]][github-ci-link]
 
 Pre-commit hooks collection that utilizes ChatGPT and OpenAI platform to validate changes made to the codebase.
 
@@ -16,8 +16,8 @@ Pre-commit hooks collection that utilizes ChatGPT and OpenAI platform to validat
   - [Setting environment variables](#setting-environment-variables)
   - [pre-commit setup](#pre-commit-setup)
 - [📦 Hooks setup](#-hooks-setup)
-  - [Remote repo reference (preferred)](#remote-repo-reference-preferred)
-  - [Local repo reference](#local-repo-reference)
+  - [Remote repository reference (preferred)](#remote-repository-reference-preferred)
+  - [Local repository reference](#local-repository-reference)
 - [🛠️ Advanced configuration](#️-advanced-configuration)
   - [Extra environment variables](#extra-environment-variables)
   - [Arguments](#arguments)
@@ -33,7 +33,9 @@ Pre-commit hooks collection that utilizes ChatGPT and OpenAI platform to validat
 
 Hook that uses OpenAI's ChatGPT API to generate a summary of changes made to a codebase and use it to populate the commit message automatically.
 
-- Read about hook's specific [configuration](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/docs/chatgpt_commit_message.md).
+- ⚙️ Read about hook's specific [configuration](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/docs/chatgpt_commit_message.md).
+
+![chatgpt-commit-message](https://raw.githubusercontent.com/dariuszporowski/chatgpt-pre-commit-hooks/main/docs/assets/demos/chatgpt_commit_message.gif)
 
 ## 📥 Prerequisites setup
 
@@ -62,34 +64,38 @@ OpenAI API Key is mandatory to run hooks and has to be setup via an environment 
 
 > 💡 **HINT**
 >
-> How to setup env vars? see: [Setting environment variables](#setting-environment-variables)
+> How to setup environment variables? see: [Setting environment variables](#setting-environment-variables)
 
 ### Azure OpenAI Service
 
-1. Go to [Azure Portal](https://portal.azure.com), and get `API Key`, `Endpoint` and `Model deployment name`
+1. Go to [Azure Portal](https://portal.azure.com), and get `API Key`, `Endpoint`, `Model deployment name`, and `api-version`.
 
     ![Azure OpenAI API Key and Endpoint](https://raw.githubusercontent.com/dariuszporowski/chatgpt-pre-commit-hooks/main/assets/images/azure-openai-service-key-endpoint.png)
 
     ![Azure OpenAI Model](https://raw.githubusercontent.com/dariuszporowski/chatgpt-pre-commit-hooks/main/assets/images/azure-openai-service-models.png)
 
+    The latest supported `api-version` you can get from [Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#chat-completions)
+
 1. Store values as an environment variables:
     - `OPENAI_API_TYPE` put `azure` to specified OpenAI provider
     - `OPENAI_API_KEY` for API Key
     - `OPENAI_API_BASE` for Endpoint
+    - `OPENAI_API_VERSION` for `api-version`
     - `OPENAI_MODEL` for Model deployment name
 
     Example:
 
     ```shell
     export OPENAI_API_TYPE="azure"
-    export OPENAI_API_KEY="sk-xxxxxx"
+    export OPENAI_API_KEY="xxxxxx"
     export OPENAI_API_BASE="https://xxxxxx.openai.azure.com/"
+    export OPENAI_API_VERSION="2023-03-15-preview"
     export OPENAI_MODEL="xxxxx-gpt-35-turbo"
     ```
 
 > 💡 **HINT**
 >
-> How to setup env vars? see: [Setting environment variables](#setting-environment-variables)
+> How to setup environment variables? see: [Setting environment variables](#setting-environment-variables)
 
 ### Setting environment variables
 
@@ -125,34 +131,55 @@ pip install pre-commit
 
 # check if working - expected print with version like `pre-commit 3.2.2`
 pre-commit --version
+```
 
+Add to your `.pre-commit-config.yaml` top level `default_install_hook_types` section (for more information, follow [Confining hooks to run at certain stages](https://pre-commit.com/#confining-hooks-to-run-at-certain-stages))
+
+```yaml
+default_install_hook_types:
+  - pre-commit # this is default hook type, equivalent to classic `pre-commit install` command
+  - prepare-commit-msg # this type is not enabled by default, please enable it - equivalent to `pre-commit install --hook-type prepare-commit-msg` command
+  - ... # rest of hook types what are you using, if any
+```
+
+next:
+
+```shell
 # setup the git repo for hooks
 pre-commit install
 
-# periodically run updates to your pre-commit config to make sure you always have the latest version of the hooks
+# (optional) periodically run updates to your pre-commit config to make sure you always have the latest version of the hooks
 pre-commit autoupdate
 ```
 
 ## 📦 Hooks setup
 
-### Remote repo reference (preferred)
+### Remote repository reference (preferred)
 
 Add to your `.pre-commit-config.yaml`
 
 ```yaml
+default_install_hook_types:
+  - pre-commit
+  - prepare-commit-msg
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
     rev: vX.Y.Z  # Use the ref you want to point at, see ⚠️ NOTE below!
     hooks:
-      - id: ... # follow 🎣 Hooks section to see available hooks IDs
+      - id: <id1> # follow 🎣 Hooks section to see available hooks IDs
+      - id: <id2> # follow 🎣 Hooks section to see available hooks IDs
+      - id: ...
 ```
 
 Example:
 
 ```yaml
+default_install_hook_types:
+  - pre-commit
+  - prepare-commit-msg
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
-    rev: v0.1.2
+    rev: v0.1.3
     hooks:
       - id: chatgpt-commit-message
 ```
@@ -161,7 +188,7 @@ repos:
 >
 > For the `rev:` always try to use the latest version. You can check the latest release under [GitHub Releases](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/releases/latest)
 
-### Local repo reference
+### Local repository reference
 
 1. Install or add [PyPI](https://pypi.org/project/chatgpt-pre-commit-hooks) package to your project.
 
@@ -174,7 +201,7 @@ repos:
    - or include it in a `requirements.txt` file in your project:
 
      ```text
-     chatgpt-pre-commit-hooks~=0.1.2
+     chatgpt-pre-commit-hooks~=0.1.3
      ```
 
       and run:
@@ -183,7 +210,7 @@ repos:
      pip install -r requirements.txt
      ```
 
-   - or, even better, in the dev section of your `pyproject.toml` file:
+   - or, even better, in the `dev` section of your `pyproject.toml` file:
 
      ```toml
      [project.optional-dependencies]
@@ -205,25 +232,40 @@ repos:
 1. Add to your `.pre-commit-config.yaml`
 
     ```yaml
+    default_install_hook_types:
+      - pre-commit
+      - prepare-commit-msg
     repos:
       - repo: local
         hooks:
           - id: <id> # follow 🎣 Hooks section to see available hooks IDs
-            name: Run <name>
-            entry: <id> # follow 🎣 Hooks section to see available hooks IDs
+            name: <name> # any name you'd like to set
+            entry: chatgpt-pre-commit-hooks
+            args:
+              - "--hook"
+              - "<id>" # follow 🎣 Hooks section to see available hooks IDs
+              - "..." # rest of args what you'd like to set (optional)
             language: system
     ```
 
     Example:
 
     ```yaml
+    default_install_hook_types:
+      - pre-commit
+      - prepare-commit-msg
     repos:
     - repo: local
         hooks:
-      - id: chatgpt-commit-message
-            name: Run ChatGPT commit-message
-            entry: chatgpt-commit-message
-            language: system
+        - id: chatgpt-commit-message
+          name: ChatGPT commit message
+          entry: chatgpt-pre-commit-hooks
+          args:
+            - "--hook"
+            - "chatgpt-commit-message"
+            - "--description"
+            - "--emoji"
+          language: system
     ```
 
 ## 🛠️ Advanced configuration
@@ -240,7 +282,7 @@ In addition to the environment variables listed in the [📥 Prerequisites setup
 
 ### Arguments
 
-Any environment variable can be overridden by hard-coded args in `pre-commit-config.yaml`, except `OPENAI_API_KEY`, `OPENAI_ORGANIZATION`.
+Any environment variable can be overridden by hard-coded arguments in `pre-commit-config.yaml`, except `OPENAI_API_KEY`, `OPENAI_ORGANIZATION`.
 
 | Name                  |  Type  |  Default  | Description                                                                                                       |
 |:----------------------|:------:|:---------:|:------------------------------------------------------------------------------------------------------------------|
@@ -254,6 +296,9 @@ Any environment variable can be overridden by hard-coded args in `pre-commit-con
 Example:
 
 ```yaml
+default_install_hook_types:
+  - pre-commit
+  - prepare-commit-msg
 repos:
   - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
     rev: vX.Y.Z
@@ -269,7 +314,7 @@ repos:
 
 ### `--env-prefix`
 
-It's a special arg where you can mark prefixes for your environment variables. This allows you to set many configurations depending on the project, account, profile, etc., for example, `personal`, `work`. Fallback is a global environment variable if prefixed is not found.
+It's a special argument where you can mark prefixes for your environment variables. This allows you to set many configurations depending on the project, account, profile, etc., for example, `personal`, `work`. Fallback is a global environment variable if prefixed isn't found.
 
 For instance, if your prefix is `personal`, then the environment variable must be set `PERSONAL__OPENAI_MAX_TOKENS`, meaning the structure is `<prefix>__<base_env_name>` - two underscores `__` between `prefix` and `base_env_name`.
 
@@ -282,9 +327,9 @@ export WORK__OPENAI_API_KEY="sk-xxxxxx"
 
 ### Variables precedence
 
-1. hard-coded args, e.g. `--openai-max-tokens`
-1. prefixed environment variable, e.g. `PERSONAL__OPENAI_MAX_TOKENS`
-1. global environment variable, e.g. `OPENAI_MAX_TOKENS`
+1. hard-coded arguments, for example `--openai-max-tokens`
+1. prefixed environment variable, for example `PERSONAL__OPENAI_MAX_TOKENS`
+1. global environment variable, for example `OPENAI_MAX_TOKENS`
 
 ## 💸 Payments
 
@@ -292,7 +337,7 @@ Project by default uses `gpt-3.5-turbo` model because of [its lower cost](https:
 
 ## 👥 Contributing
 
-Contributions to the project are very welcome! Please follow [Contributing Guide](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/CONTRIBUTING.md).
+Contributions to the project are welcome! Please follow [Contributing Guide](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/CONTRIBUTING.md).
 
 ## 📄 License
 

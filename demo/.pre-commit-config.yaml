@@ -1,0 +1,19 @@
+default_install_hook_types:
+  - pre-commit
+  - prepare-commit-msg
+repos:
+  - repo: local
+    hooks:
+      - id: chatgpt-commit-message
+        name: ChatGPT commit message
+        entry: python -m chatgpt_pre_commit_hooks.main
+        language: python
+        language_version: python3
+        additional_dependencies: ["openai>=0.27.4", "tiktoken>=0.3.3"]
+        args:
+          - "--hook"
+          - "chatgpt-commit-message"
+          - "--max-char-count"
+          - "1000"
+          - "--description"
+        stages: [prepare-commit-msg]

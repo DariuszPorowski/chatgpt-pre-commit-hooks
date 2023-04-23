@@ -21,7 +21,44 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout Repo
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        # use fetch --all for setuptools_scm to work
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: .python-version
+
+      - name: Install dependencies
+        run: pip install . .[build]
+
+      - name: Build wheel
+        run: python3 -m pip wheel --no-deps -w dist .
+
+      - name: Check distribution
+        run: twine check dist/chatgpt_pre_commit_hooks*
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/*
+
+  pypi-publish-test:
+    if: ${{ github.repository == 'DariuszPorowski/chatgpt-pre-commit-hooks' }}
+    name: Publish to PyPI (test)
+    needs: build
+    environment:
+      name: pypi-test
+      url: https://test.pypi.org/project/chatgpt-pre-commit-hooks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Setup Python
@@ -32,51 +69,21 @@ jobs:
       - name: Install dependencies
         run: pip install . .[build]
 
-      - name: Build
-        run: python -m build --wheel
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist
-          path: |
-            dist/*
-
-  pypi-release-test:
-    name: PyPI Release (test)
-    needs: build
-    environment:
-      name: pypi-test
-      url: https://test.pypi.org/project/chatgpt-pre-commit-hooks
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version-file: .python-version
-
-      - name: Install dependencies
-        run: pip install .[build]
-
-      - name: Download Artifact
+      - name: Download artifact
         uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist
 
       - name: Publish to PyPI
-        run: twine upload --verbose --repository testpypi dist/*
+        run: twine upload --verbose --repository testpypi dist/chatgpt_pre_commit_hooks*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
 
-  pypi-release-prod:
-    name: PyPI Release (prod)
+  pypi-publish-prod:
+    if: ${{ github.repository == 'DariuszPorowski/chatgpt-pre-commit-hooks' }}
+    name: Publish to PyPI (prod)
     needs:
       - build
     environment:
@@ -86,10 +93,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - name: Checkout Repo
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Setup Python
@@ -98,23 +102,23 @@ jobs:
           python-version-file: .python-version
 
       - name: Install dependencies
-        run: pip install .[build]
+        run: pip install . .[build]
 
-      - name: Download Artifact
+      - name: Download artifact
         uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist
 
       - name: Publish to PyPI
-        run: twine upload dist/*
+        run: twine upload dist/chatgpt_pre_commit_hooks*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
 
   gh-release-update:
     name: GitHub Release
-    needs: pypi-release-prod
+    needs: pypi-publish-prod
     permissions:
       contents: write
     environment:
@@ -133,8 +137,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: false
-          files: |
-            dist/*
+          files: dist/*
 
       # https://docs.github.com/en/rest/releases/releases#update-a-release
       # - name: Mark as latest

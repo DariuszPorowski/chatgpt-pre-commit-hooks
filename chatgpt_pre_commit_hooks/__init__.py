@@ -1,1 +1,1 @@
-"""Init."""
+"""Hooks package."""

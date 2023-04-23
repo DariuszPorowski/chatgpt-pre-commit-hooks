@@ -2,7 +2,7 @@
 
 <!-- Add a more detailed description of the changes if needed. -->
 
-## 🩹 Related issue
+## 🔗 Related issue
 
 <!-- If your PR refers to a related issue, link it here. -->
 Fixes: #
@@ -26,4 +26,4 @@ Fixes: #
 - [ ] I've read the [`CODE_OF_CONDUCT.md`](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/CODE_OF_CONDUCT.md) document.
 - [ ] I've read the [`CONTRIBUTING.md`](https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/CONTRIBUTING.md) guide.
 - [ ] I've written tests for all new methods and classes that I created.
-- [ ] I've written the docstring in Google format for all the methods and classes that I used.
+- [ ] I've written the `docstring` in Google format for all the methods and classes that I used.

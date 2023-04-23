@@ -1,0 +1,18 @@
+default_install_hook_types:
+  - pre-commit
+  - prepare-commit-msg
+
+repos:
+  - repo: https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks
+    rev: __PLACEHOLDER__
+    hooks:
+      - id: chatgpt-commit-message
+        args:
+          - "--emoji"
+          - "--description"
+          - "--log-level"
+          - "debug"
+          - "--log-level"
+          - "debug"
+          - "--env-prefix"
+          - "test"

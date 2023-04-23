@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+COMMIT_MSG.txt
+.vhs_demo_repo/
+demo/demo.*
