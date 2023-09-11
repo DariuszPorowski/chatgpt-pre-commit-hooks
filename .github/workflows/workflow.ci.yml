@@ -42,7 +42,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Run Dependency Review
         uses: actions/dependency-review-action@v3
@@ -66,7 +66,7 @@ jobs:
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
@@ -121,7 +121,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download Sarifs
         uses: actions/download-artifact@v3
@@ -140,7 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -161,7 +161,7 @@ jobs:
       - lint
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -200,7 +200,7 @@ jobs:
   #     OPENAI_MODEL: ${{ vars.TEST__OPENAI_MODEL }}
   #   steps:
   #     - name: Checkout Repo
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
 
   #     - name: Init VHS
   #       uses: charmbracelet/vhs-action@v1
@@ -232,7 +232,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
