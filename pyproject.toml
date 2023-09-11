@@ -28,7 +28,7 @@ classifiers = [
 	"Topic :: Software Development :: Version Control",
 	"Topic :: Software Development :: Version Control :: Git",
 ]
-dependencies = ["openai~=0.27.4", "tiktoken>=0.3.3,<0.5.0"]
+dependencies = ["openai>=0.27.4,<0.29.0", "tiktoken>=0.3.3,<0.5.0"]
 
 [project.urls]
 "Homepage" = "https://github.com/DariuszPorowski/chatgpt-pre-commit-hooks/blob/main/README.md"
